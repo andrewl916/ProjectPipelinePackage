@@ -63,7 +63,7 @@ for (k in 1:30){
 MSE_data <- data.frame(names = folds,
                        MSE = c(MSE_2, MSE_5, MSE_10))
 ```
-```{r}
+```{r, fig.width=10,fig.height=11}
 # plot the data
 ggplot(data = MSE_data,
        aes(x = names, MSE)) +
