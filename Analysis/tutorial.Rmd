@@ -1,0 +1,89 @@
+---
+title: "Project 3: mypracticepackage Tutorial"
+author: "Andrew Lee & Lori Wang"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mypracticepackage Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+### Introduction
+This package features many statistical functions developed by me for the STAT 302 class at the University of Washington. It can be installed via the following code:
+```{r, eval = FALSE}
+devtools::install_github("andrewl916/mypracticepackage", build_vignette = TRUE, build_opts = c())
+```
+
+```{r setup}
+library(magrittr)
+library(dplyr)
+library(mypracticepackage)
+library(kableExtra)
+library(ggplot2)
+library(class)
+library(randomForest)
+
+penguins <- read.csv("C:/Users/andre/Desktop/STAT302/projects/project_3/ProjectPipelinePackage/Data/my_penguins.csv")
+
+source("C:/Users/andre/Desktop/STAT302/projects/project_3/mypracticepackage/R/my_rf_cv.R")
+```
+
+### my_rf_cv Demonstration
+Instead of classifying based on neighboring data points in the training data,
+the random forest algorithm classify based on splits in the parameters.
+We want to predict $$body\_mass\_g$$ using covariates $$bill\_length\_mm$$, $$bill\_depth\_mm$$, $$flipper\_length\_mm$$.
+Inputs:
+- \code{k}: number of folds
+```{r}
+# remove NA data in the data set
+penguins <- na.omit(penguins)
+
+# create a list to label the number of folds
+folds <- c(rep("2", 30), rep("5", 30), rep("10", 30))
+
+# create empty lists to store MSE
+MSE_2 <- rep(NA, length(30))
+MSE_5 <- rep(NA, length(30))
+MSE_10 <- rep(NA, length(30))
+
+# fill MSE data
+for (k in 1:30){
+  MSE_2[k] <- my_rf_cv(2)
+  MSE_5[k] <- my_rf_cv(5)
+  MSE_10[k] <- my_rf_cv(10)
+}
+
+# combine the label and data into one data frame
+MSE_data <- data.frame(names = folds,
+                       MSE = c(MSE_2, MSE_5, MSE_10))
+```
+```{r}
+# plot the data
+ggplot(data = MSE_data,
+       aes(x = names, MSE)) +
+  geom_boxplot(fill = "lightblue") +
+  theme_bw(base_size = 20) +
+  labs(title = "MSE According to Number of Folds",
+       x = "Number of Folds",
+       y = "MSE") +
+  theme(plot.title =
+          element_text(hjust = 0.5),
+        text = element_text(size = 12)) +
+  ggsave(filename = "../Output/Figures/mse_boxplot.png")
+```
+```{r}
+MSE_table <- data.frame("folds" = c(2, 5, 10),
+                        "mean" = c(mean(MSE_2), mean(MSE_5), mean(MSE_10)),
+                        "std_deviation" = c(sd(MSE_2), sd(MSE_5), sd(MSE_10)))
+kable_styling(kable(MSE_table))
+
+write.csv(MSE_data, "../Output/Results/MSE_data.csv")
+saveRDS(MSE_table, "../Output/Results/MSE_table.RDS")
+```
+In general, a fold of 2 has the widest standard deviation, while a fold of 10 gives the lowest mean MSE. THis could be the case because having 10 folds allows for the algorithm to best predict the body weight of the penguins in the dataset.

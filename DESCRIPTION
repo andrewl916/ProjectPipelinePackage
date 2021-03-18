@@ -1,0 +1,14 @@
+Package: ProjectPipelinePackage
+Title: This Package Demonstrates a Project Pipeline
+Version: 0.1.0
+Authors@R: 
+    person(given = "First",
+           family = "Last",
+           role = c("aut", "cre"),
+           email = "first.last@example.com")
+Description: This Package Demonstrates a Project Pipeline.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
